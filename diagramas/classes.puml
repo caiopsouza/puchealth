@@ -1,0 +1,233 @@
+@startuml Classes
+left to right direction
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+' skinparam linetype ortho
+
+' hide visibility icon
+skinparam classAttributeIconSize 0
+
+class "Endereço" as endereco {
+  +Id: Guid
+  +Rua: String 
+  +Numero: String 
+  +Bairro: String 
+  +Cidade: String 
+  +Estado: String 
+  +CEP: String
+  --
+  createEndereco(): Endereco
+  getEnderecoById(): Endereco
+  editEndereco(): Void
+}
+
+enum "NivelPermissão" as permissao <<enum>> {
+    Paciente: Int = 1
+    Profissional: Int = 2
+    Administrador: Int = 3
+    SuperAdministrador: Int = 4
+    --
+    IsPaciente(): Bool
+    IsProfissional(): Bool
+    IsAdministrador(): Bool
+    IsSuperAdministrador(): Bool
+}
+
+class "Usuário" as usuario {
+  +Id: Guid
+  +Nome: String
+  +Email: String
+  -Senha: Hash
+  +Ativo: Bool
+  --
+  +listUsuarios(): Usuario[]
+  +validaAcesso(): Bool
+}
+
+usuario "0..*"-"1" permissao
+usuario "1..*"--"1" endereco
+
+class "Paciente" as paciente {
+  --
+  +createPaciente(): Paciente
+  +getPacienteById(): Paciente
+  +editPaciente(): void
+}
+
+paciente --|> usuario
+
+class "Profissional" as profissional {
+  --
+  +createProfissional(): Profissional
+  +getProfissional(): Profissional
+  +editProfissional(): void
+}
+
+profissional --|> usuario
+
+class "Especialidade" as especialidade {
+  +Id: Guid
+  +Nome: String
+  +Descrição: String[0..1]
+  --
+  +createEspecialidade(): Especialidade
+  +getEspecialidadeById(): Especialidade
+  +editEspecialidade(): void
+}
+
+profissional "0..*"--"1" especialidade
+
+enum "ProfissionalTipo" as profissional_tipo <<enum>> {
+    Medico
+    Enfermeiro
+    Fisioterapeuta
+    Psicologo
+}
+
+profissional "0..*"--"1" profissional_tipo
+
+class "Estabelecimento" as estabelecimento {
+  +Id: Guid
+  +Nome: String
+  +RazaoSocial: String
+  +TipoId: Int
+  --
+  +createEstabelecimento(): Estabelecimento
+  +getEstabelecimentoById(): Estabelecimento
+  +editEstabelecimento(): void
+}
+
+estabelecimento "1..*"--"1" endereco
+
+enum "EstabelecimentoTipo" as estabelecimento_tipo <<enum>> {
+    PostoDeSaude
+    Hospital
+    Laboratorio
+    Clinica
+}
+
+estabelecimento "0..*"--"1" estabelecimento_tipo
+
+class "Medicamento" as medicamento {
+  +Id: Guid
+  +Nome: String
+  +Quantidade: Int
+  --
+  +createMedicamento(): Medicamento
+  +getMedicamentoById(): Medicamento
+  +editMedicamento(): void
+}
+
+estabelecimento "1"--"0..*" medicamento
+
+class "Vacina" as vacina {
+  +Id: Guid
+  +Nome: String
+  +Descrição: String[0..1]
+  --
+  +findVacina(): Vacina[]
+  +createVacina(): Vacina
+  +getVacinaById(): Vacina
+  +deleteVacina(): void
+  +editVacina(): void
+}
+
+estabelecimento "0..*"--"0..*" vacina
+
+class "Procedimento" as procedimento {
+  +Id: Guid
+  +Nome: String
+  +Descrição: String
+  --
+  +findProcedimento(): Procedimento[]
+  +createProcedimento(): Procedimento
+  +getProcedimentoById(): Procedimento
+  +deleteProcedimento(): void
+  +editProcedimento(): void
+}
+
+estabelecimento "0..*"-"0..*" procedimento
+
+class "ProcedimentoOferecido" as proc_oferecido {
+  +Id: Guid
+  +Horário: DateTime
+  +Duração: TimeSpan
+}
+
+(estabelecimento, procedimento) . proc_oferecido
+profissional "1"--"0..*" proc_oferecido
+
+enum "AgendaSituacao" as agenda_situacao <<enum>> {
+    Requisitada
+    Confirmada
+    Cancelada
+    Realizada
+}
+
+class "Agenda" as agenda {
+  +Id: Guid
+  +AgendaSituacao: Situacao
+  +Entrada: DateTime[0..1]
+  +Saída: DateTime[0..1]
+  --
+  +findAgenda(): Agenda[]
+  +createAgenda(): Agenda
+  +getAgendaById(): Agenda
+  +deleteAgenda(): void
+  +editAgenda(): void
+}
+
+agenda_situacao "1"--"0..*" agenda
+paciente "1"--"0..*" agenda
+proc_oferecido "1"--"0..*" agenda
+
+class "Leito" as leito {
+  *Id: Guid
+  --
+  +findLeito(): Leito[]
+  +createLeito(): Leito
+  +getLeitoById(): Leito
+  +deleteLeito(): void
+  +editLeito(): void
+}
+
+estabelecimento "1"--"0..n" leito
+
+class "Internação" as internacao {
+  +Id: Guid
+  +Entrada: DateTime
+  +Saída: DateTime[0..1]
+}
+
+internacao "1"--"0..*" leito
+internacao "1"--"0..*" paciente
+
+class "Ação" as acao {
+  +Id: Guid
+  +Título: String
+  +Descrição: String
+  +InícioExibição: DateTime
+  +FinalExibição: DateTime
+  --
+  +findAcoes(): Acao[]
+  +createAcao(): Acao
+  +getAcaoById(): Acao
+  +deleteAcao(): void
+  +editAcao(): void
+}
+
+class "CodigoDoencas" as doencas {
+  +Id: Guid
+  +Cid: String
+  +Nome: String
+  +Descrição: String
+  +Ativo: Bool
+  --
+  +getDoencas(): Doencas[]
+  +updateDoencas(): void
+}
+
+@enduml

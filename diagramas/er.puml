@@ -1,0 +1,190 @@
+@startuml Entidade e relacionamento
+left to right direction
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+' skinparam linetype ortho
+
+entity "Endereço" as endereco {
+  *Id : Guid <<generated>>
+  --
+  *Rua : String
+  *Numero : String
+  *Bairro : String
+  *Cidade : String
+  *Estado : String
+  *CEP : String
+}
+
+entity "NivelPermissao" as permissao {
+    *Id: Int
+    --
+    *Nome: String
+}
+
+entity "Usuário" as usuario {
+    *Id: Guid
+    --
+    *Nome: String
+    *Email: String
+    *Senha: Hash
+    *Ativo: Bool
+    *NivelPermissao: Int <<FK>>
+    *EnderecoId: Guid <<FK>>
+}
+
+usuario }o--|| permissao
+usuario }|--|| endereco
+
+entity "Paciente" as paciente {
+  *UsuarioId : Guid <<FK>>
+}
+
+paciente |o--|| usuario
+
+entity "Profissional" as profissional {
+  *UsuarioId : Guid <<FK>>
+  --
+  *EspecialidadeId: Guid <<FK>>
+  *TipoId: Int <<FK>>
+}
+
+profissional |o--|| usuario
+
+entity "Especialidade" as especialidade {
+  *Id : Guid
+  --
+  *Nome: String
+  Descrição: String
+}
+
+profissional }o--|| especialidade
+
+entity "ProfissionalTipo" as profissional_tipo {
+    *Id: Int
+    --
+    *Nome: String
+}
+
+profissional }o--|| profissional_tipo
+
+entity "Estabelecimento" as estabelecimento {
+  *Id: Guid
+  --
+  *Nome: String
+  *RazaoSocial: String
+  *TipoId: Int <<FK>>
+  *EnderecoId: Guid <<FK>>
+}
+
+estabelecimento }|--|| endereco
+
+entity "EstabelecimentoTipo" as estabelecimento_tipo {
+    *Id: Int
+    --
+    *Nome: String
+}
+
+estabelecimento }o--|| estabelecimento_tipo
+
+entity "Medicamento" as medicamento {
+  *Id: Guid
+  --
+  *Nome: String
+  *Quantidade: Int
+  *EstabelecimentoId: Guid <<FK>>
+}
+
+estabelecimento ||--o{ medicamento
+
+entity "Vacina" as vacina {
+  *Id: Guid
+  *Nome: String
+  Descrição: String
+}
+
+class "VacinaOferecida" as vacina_oferecida {
+  +Id: Guid
+}
+
+vacina_oferecida ||--o{ estabelecimento
+vacina_oferecida ||--o{ vacina
+
+entity "Procedimento" as procedimento {
+  *Id: Guid
+  --
+  *Nome: String
+  *Descrição: String
+}
+
+entity "ProcedimentoOferecido" as proc_oferecido {
+  *Id: Guid
+  --
+  *Horário: DateTime
+  *Duração: TimeSpan
+  *EstabelecimentoId: Guid <<FK>>
+  *ProcedimentoId: Guid <<FK>>
+  *ProfissionalId: Guid <<FK>>
+}
+
+proc_oferecido ||--o{ estabelecimento
+proc_oferecido ||--o{ procedimento
+profissional ||--o{ proc_oferecido
+
+entity "AgendaSituacao" as agenda_situacao {
+    *Id: Int
+    --
+    *Nome: String
+}
+
+entity "Agenda" as agenda {
+  *Id: Guid
+  *AgendaSituacao: Situacao
+  Entrada: DateTime
+  Saída: DateTime
+}
+
+agenda_situacao ||--o{ agenda
+paciente ||--o{ agenda
+proc_oferecido ||--o{ agenda
+
+entity "Leito" as leito {
+  *Id: Guid
+  --
+  *EstabelecimentoId: Guid <<FK>>
+}
+
+estabelecimento ||--o{ leito
+
+entity "Internação" as internacao {
+  *Id: Guid
+  --
+  *LeitoId: Guid <<FK>>
+  *Entrada: DateTime
+  Saída: DateTime
+}
+
+internacao ||--o{ leito
+internacao ||--o{ paciente
+
+entity "Ação" as acao {
+  *Id: Guid
+  --
+  *Título: String
+  *Descrição:: String
+  *InícioExibição: DateTime
+  *FinalExibição: DateTime
+}
+
+entity "CodigoDoencas" as doencas {
+  *Id: Guid
+  --
+  *Cid: String
+  *Nome: String
+  *Descrição:: String
+  *Ativo: Bool
+}
+
+@enduml

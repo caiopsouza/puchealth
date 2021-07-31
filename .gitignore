@@ -1,5 +1,7 @@
+materiais/
+diagramas/~$$*
 bin/
 obj/
-/packages/
+src/packages/
 riderModule.iml
-/_ReSharper.Caches/
+src/_ReSharper.Caches/
