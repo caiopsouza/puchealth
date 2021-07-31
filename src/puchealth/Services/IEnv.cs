@@ -18,11 +18,11 @@ namespace puchealth.Services
         public const string RoleAny = "admin,client";
 
         // Admin has a fixed Id for convenience
-        public static readonly ClientView AdminClientView = new()
+        public static readonly UserView AdminUserView = new()
         {
             Id = Guid.Parse("f7f300c9-18f8-4c66-9e7e-55c5ca378dac"),
             Name = "Admin",
-            Email = "admin@puchealth.com.br",
+            Email = "admin@puchealth.com.br"
         };
 
         // FIXME: Better error handling if the key is not defined

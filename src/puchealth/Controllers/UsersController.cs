@@ -15,8 +15,8 @@ using puchealth.Services;
 
 namespace puchealth.Controllers
 {
-    [AutoMap(typeof(Client))]
-    public class ClientView
+    [AutoMap(typeof(User))]
+    public class UserView
     {
         public Guid Id { get; init; }
 
@@ -25,8 +25,8 @@ namespace puchealth.Controllers
         public string Email { get; init; } = null!;
     }
 
-    [AutoMap(typeof(Client), ReverseMap = true)]
-    public class ClientPostView
+    [AutoMap(typeof(User), ReverseMap = true)]
+    public class UserPostView
     {
         public string Name { get; init; } = null!;
 
@@ -35,8 +35,8 @@ namespace puchealth.Controllers
         public string Password { get; init; } = null!;
     }
 
-    [AutoMap(typeof(Client), ReverseMap = true)]
-    public class ClientPutView
+    [AutoMap(typeof(User), ReverseMap = true)]
+    public class UserPutView
     {
         public string Name { get; init; } = null!;
 
@@ -44,7 +44,7 @@ namespace puchealth.Controllers
     }
 
     [Route("v1/[controller]")]
-    public class ClientsController : Controller
+    public class UsersController : Controller
     {
         private readonly Context _context;
 
@@ -52,9 +52,9 @@ namespace puchealth.Controllers
 
         private readonly IMapper _mapper;
 
-        private readonly UserManager<Client> _userManager;
+        private readonly UserManager<User> _userManager;
 
-        public ClientsController(IEnv env, Context context, IMapper mapper, UserManager<Client> userManager)
+        public UsersController(IEnv env, Context context, IMapper mapper, UserManager<User> userManager)
         {
             _env = env;
             _context = context;
@@ -65,29 +65,29 @@ namespace puchealth.Controllers
         [HttpGet]
         [Authorize(Roles = IEnv.RoleAny)]
         [Route("")]
-        public IAsyncEnumerable<ClientView> GetAll() =>
+        public IAsyncEnumerable<UserView> GetAll() =>
             (
-                from client in _context.Users
-                orderby client.Name, client.Id
-                select client
+                from user in _context.Users
+                orderby user.Name, user.Id
+                select user
             )
-            .ProjectTo<ClientView>(_mapper.ConfigurationProvider)
+            .ProjectTo<UserView>(_mapper.ConfigurationProvider)
             .AsAsyncEnumerable();
 
         [HttpGet]
         [Authorize(Roles = IEnv.RoleAny)]
         [Route("{id:guid}")]
-        [ProducesResponseType(typeof(ClientView), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserView), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Get(Guid id)
         {
-            var client = await _context.Users
-                .ProjectTo<ClientView>(_mapper.ConfigurationProvider)
+            var user = await _context.Users
+                .ProjectTo<UserView>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            return client == null
+            return user == null
                 ? NotFound()
-                : Ok(client);
+                : Ok(user);
         }
 
         private BadRequestObjectResult BadRequestFromIdentityErrors(IdentityResult result)
@@ -103,19 +103,19 @@ namespace puchealth.Controllers
         [HttpPost]
         [Authorize(Roles = IEnv.RoleAdmin)]
         [Route("")]
-        [ProducesResponseType(typeof(ClientView), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(UserView), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(IEnumerable<IdentityError>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Post([FromBody] ClientPostView data)
+        public async Task<ActionResult> Post([FromBody] UserPostView data)
         {
-            var client = _mapper.Map<Client>(data);
+            var user = _mapper.Map<User>(data);
 
-            client.UserName = data.Email;
-            client.Id = _env.NewGuid();
+            user.UserName = data.Email;
+            user.Id = _env.NewGuid();
 
-            var userIdentityResult = await _userManager.CreateAsync(client, data.Password);
+            var userIdentityResult = await _userManager.CreateAsync(user, data.Password);
 
             if (userIdentityResult.Succeeded)
-                return Created($"v1/clients/{client.Id}/", _mapper.Map<ClientView>(client));
+                return Created($"v1/users/{user.Id}/", _mapper.Map<UserView>(user));
 
             return BadRequestFromIdentityErrors(userIdentityResult);
         }
@@ -123,24 +123,24 @@ namespace puchealth.Controllers
         [HttpPut]
         [Authorize(Roles = IEnv.RoleAdmin)]
         [Route("{id:guid}")]
-        [ProducesResponseType(typeof(ClientView), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserView), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(IEnumerable<IdentityError>), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Put(Guid id, [FromBody] ClientPutView data)
+        public async Task<ActionResult> Put(Guid id, [FromBody] UserPutView data)
         {
-            var client = await _userManager.FindByIdAsync(id.ToString());
+            var user = await _userManager.FindByIdAsync(id.ToString());
 
-            if (client is null)
+            if (user is null)
                 return NotFound();
 
-            client.Name = data.Name;
-            client.UserName = data.Email;
-            client.Email = data.Email;
+            user.Name = data.Name;
+            user.UserName = data.Email;
+            user.Email = data.Email;
 
-            var userIdentityResult = await _userManager.UpdateAsync(client);
+            var userIdentityResult = await _userManager.UpdateAsync(user);
 
             if (userIdentityResult.Succeeded)
-                return Ok(_mapper.Map<ClientView>(client));
+                return Ok(_mapper.Map<UserView>(user));
 
             return BadRequestFromIdentityErrors(userIdentityResult);
         }
@@ -153,12 +153,12 @@ namespace puchealth.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var client = await _userManager.FindByIdAsync(id.ToString());
+            var user = await _userManager.FindByIdAsync(id.ToString());
 
-            if (client is null)
+            if (user is null)
                 return NotFound();
 
-            await _userManager.DeleteAsync(client);
+            await _userManager.DeleteAsync(user);
 
             return Ok();
         }

@@ -10,7 +10,10 @@ namespace puchealth.Pages
     {
         private readonly ILogger<ErrorModel> logger;
 
-        public ErrorModel(ILogger<ErrorModel> _logger) => logger = _logger;
+        public ErrorModel(ILogger<ErrorModel> _logger)
+        {
+            logger = _logger;
+        }
 
         public string RequestId { get; set; }
 

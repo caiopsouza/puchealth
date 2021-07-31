@@ -9,6 +9,9 @@ namespace puchealth.Models
         {
         }
 
-        public Role(Guid id, string name) : base(name) => Id = id;
+        public Role(Guid id, string name) : base(name)
+        {
+            Id = id;
+        }
     }
 }

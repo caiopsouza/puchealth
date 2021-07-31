@@ -7,7 +7,10 @@ namespace Tests.Setup
     {
         private int _currentGuid;
 
-        public MockedEnv() => _currentGuid = 0;
+        public MockedEnv()
+        {
+            _currentGuid = 0;
+        }
 
         // GUIDs are sequential when testing to be deterministic and predictable.
         public Guid NewGuid()
@@ -16,7 +19,9 @@ namespace Tests.Setup
             return CreateGuid(_currentGuid);
         }
 
-        public static Guid CreateGuid(int id) =>
-            new(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static Guid CreateGuid(int id)
+        {
+            return new(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        }
     }
 }

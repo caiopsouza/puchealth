@@ -21,7 +21,7 @@ namespace Tests.Setup
     {
         private static readonly JsonSerializerOptions JsonDeserializeOptions = new()
         {
-            PropertyNameCaseInsensitive = true,
+            PropertyNameCaseInsensitive = true
         };
 
         private readonly HttpClient _client;
@@ -67,8 +67,10 @@ namespace Tests.Setup
             return (res, message!);
         }
 
-        protected async Task<(HttpResponseMessage, TResult)> Post<TResult>(string url) =>
-            await Post<TResult>(url, null!);
+        protected async Task<(HttpResponseMessage, TResult)> Post<TResult>(string url)
+        {
+            return await Post<TResult>(url, null!);
+        }
 
         protected async Task<(HttpResponseMessage, string)> PutResultAsString(string url, object data)
         {
@@ -106,7 +108,7 @@ namespace Tests.Setup
                     {
                         typeof(DbContextOptions<Context>),
                         typeof(IEnv),
-                        typeof(IProductSeed),
+                        typeof(IProductSeed)
                     };
 
                     foreach (var service in servicesToRemove)
@@ -133,10 +135,10 @@ namespace Tests.Setup
         // Login as the user
         protected async Task<(HttpResponseMessage, string)> LoginHttpResponse(string email, string password)
         {
-            var loginData = new ClientLogin
+            var loginData = new UserLogin
             {
                 Email = email,
-                Password = password,
+                Password = password
             };
 
             return await PostResultAsString("account/login", loginData);
@@ -151,34 +153,44 @@ namespace Tests.Setup
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        protected readonly ClientPostView _alice = new()
+        protected readonly UserPostView _alice = new()
         {
             Email = "alice@other.company.com",
             Name = "Alice",
-            Password = "AliceSecretPassw000rd!",
+            Password = "AliceSecretPassw000rd!"
         };
 
-        private readonly ClientPostView _bob = new()
+        private readonly UserPostView _bob = new()
         {
             Email = "bob@other.company.com",
             Name = "Bob",
-            Password = "BobSecretPassw000rd!",
+            Password = "BobSecretPassw000rd!"
         };
 
-        protected async Task<ClientView> CreateAlice() =>
-            (await Post<ClientView>("clients", _alice)).Item2;
+        protected async Task<UserView> CreateAlice()
+        {
+            return (await Post<UserView>("users", _alice)).Item2;
+        }
 
-        protected async Task<ClientView> CreateBob() =>
-            (await Post<ClientView>("clients", _bob)).Item2;
+        protected async Task<UserView> CreateBob()
+        {
+            return (await Post<UserView>("users", _bob)).Item2;
+        }
 
-        protected async Task LoginAsAdmin() =>
-            await Login(IEnv.AdminClientView.Email, "Supersecretpassw000rd!");
+        protected async Task LoginAsAdmin()
+        {
+            await Login(IEnv.AdminUserView.Email, "Supersecretpassw000rd!");
+        }
 
-        protected async Task LoginAsAlice() =>
+        protected async Task LoginAsAlice()
+        {
             await Login(_alice.Email, _alice.Password);
+        }
 
-        protected async Task LoginAsBob() =>
+        protected async Task LoginAsBob()
+        {
             await Login(_bob.Email, _bob.Password);
+        }
 
         #endregion
     }

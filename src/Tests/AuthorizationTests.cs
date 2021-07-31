@@ -20,21 +20,21 @@ namespace Tests
         public static TheoryData<string, string, string, bool> PermissionData => new()
         {
             {"account", "login", "post", true},
-            {"clients", "", "get", true},
-            {"clients", "/00000001-0000-0000-0000-000000000000", "get", true},
-            {"clients", "", "post", false},
-            {"clients", "/00000001-0000-0000-0000-000000000000", "put", false},
-            {"clients", "/00000001-0000-0000-0000-000000000000", "delete", false},
+            {"users", "", "get", true},
+            {"users", "/00000001-0000-0000-0000-000000000000", "get", true},
+            {"users", "", "post", false},
+            {"users", "/00000001-0000-0000-0000-000000000000", "put", false},
+            {"users", "/00000001-0000-0000-0000-000000000000", "delete", false},
             {"bookmarks", "", "get", true},
             {"bookmarks", "/00000001-0000-0000-0000-000000000000", "post", true},
-            {"bookmarks", "/00000001-0000-0000-0000-000000000000", "delete", true},
+            {"bookmarks", "/00000001-0000-0000-0000-000000000000", "delete", true}
         };
 
         [Fact]
         public async Task LoginInfo()
         {
             // Act
-            var (response, actual) = await LoginHttpResponse(IEnv.AdminClientView.Email, "Supersecretpassw000rd!");
+            var (response, actual) = await LoginHttpResponse(IEnv.AdminUserView.Email, "Supersecretpassw000rd!");
             response.EnsureSuccessStatusCode();
 
             var jwtHandler = new JwtSecurityTokenHandler();
@@ -45,13 +45,15 @@ namespace Tests
             token.Issuer.Should().BeEquivalentTo(IEnv.JwtIssuer);
             token.Audiences.Should().BeEquivalentTo(IEnv.JwtAudience);
 
-            string GetClaim(string claimType) =>
-                token.Claims.First(c => c.Type == claimType).Value;
+            string GetClaim(string claimType)
+            {
+                return token.Claims.First(c => c.Type == claimType).Value;
+            }
 
             // For some reason nameidentifier is mapped into nameid. It seems to work otherwise.
-            GetClaim("nameid").Should().BeEquivalentTo(IEnv.AdminClientView.Id.ToString());
-            GetClaim("email").Should().BeEquivalentTo(IEnv.AdminClientView.Email);
-            GetClaim("unique_name").Should().BeEquivalentTo(IEnv.AdminClientView.Name);
+            GetClaim("nameid").Should().BeEquivalentTo(IEnv.AdminUserView.Id.ToString());
+            GetClaim("email").Should().BeEquivalentTo(IEnv.AdminUserView.Email);
+            GetClaim("unique_name").Should().BeEquivalentTo(IEnv.AdminUserView.Name);
             GetClaim("role").Should().BeEquivalentTo(IEnv.RoleAdmin);
         }
 
@@ -76,7 +78,7 @@ namespace Tests
                 "post" => PostResultAsString(url, null!),
                 "put" => PutResultAsString(url, null!),
                 "delete" => Delete(url),
-                _ => GetResultAsString(url),
+                _ => GetResultAsString(url)
             };
             var (res, _) = await action;
             return res.StatusCode;
@@ -96,7 +98,7 @@ namespace Tests
 
         [Theory]
         [MemberData(nameof(PermissionData))]
-        public async Task HasPermissionClient(string controller, string path, string verb, bool allowed)
+        public async Task HasPermissionUser(string controller, string path, string verb, bool allowed)
         {
             // Arrange
             await CreateAlice();

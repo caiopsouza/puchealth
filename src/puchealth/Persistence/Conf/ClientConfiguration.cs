@@ -4,9 +4,9 @@ using puchealth.Models;
 
 namespace puchealth.Persistence.Conf
 {
-    public class ClientConfiguration : IEntityTypeConfiguration<Client>
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public void Configure(EntityTypeBuilder<Client> builder)
+        public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.HasIndex(e => new {e.Name, e.Id});
         }

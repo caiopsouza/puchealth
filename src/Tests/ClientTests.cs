@@ -12,103 +12,103 @@ using Xunit;
 
 namespace Tests
 {
-    public class ClientTests : IntegrationTest
+    public class UserTests : IntegrationTest
     {
-        public ClientTests(WebApplicationFactory<Startup> factory) : base(factory)
+        public UserTests(WebApplicationFactory<Startup> factory) : base(factory)
         {
         }
 
-        public static TheoryData<ClientPostView, IEnumerable<IdentityError>> AccountInfoErrorData =>
+        public static TheoryData<UserPostView, IEnumerable<IdentityError>> AccountInfoErrorData =>
             new()
             {
                 {
-                    new ClientPostView
+                    new UserPostView
                     {
                         Name = "Caio Souza",
                         Email = "admin@puchealth.com.br",
-                        Password = "Passsssssw0rd!",
+                        Password = "Passsssssw0rd!"
                     },
                     new[]
                     {
                         new IdentityError
                         {
                             Code = "DuplicateUserName",
-                            Description = "Username 'admin@puchealth.com.br' is already taken.",
-                        },
+                            Description = "Username 'admin@puchealth.com.br' is already taken."
+                        }
                     }
                 },
 
                 {
-                    new ClientPostView
+                    new UserPostView
                     {
                         Name = "Caio Souza",
                         Email = "caio.souza.puchealth.com.br",
-                        Password = "Passsssssw0rd!",
+                        Password = "Passsssssw0rd!"
                     },
                     new[]
                     {
                         new IdentityError
                         {
-                            Code = "InvalidEmail", Description = "Email 'caio.souza.puchealth.com.br' is invalid.",
-                        },
+                            Code = "InvalidEmail", Description = "Email 'caio.souza.puchealth.com.br' is invalid."
+                        }
                     }
-                },
+                }
             };
 
-        public static TheoryData<ClientPostView, IEnumerable<IdentityError>> PasswordErrorData =>
+        public static TheoryData<UserPostView, IEnumerable<IdentityError>> PasswordErrorData =>
             new()
             {
                 {
-                    new ClientPostView
+                    new UserPostView
                     {
                         Name = "Caio Souza",
                         Email = "caio.souza@puchealth.com.br",
-                        Password = "word",
+                        Password = "word"
                     },
                     new[]
                     {
                         new IdentityError
                         {
                             Code = "PasswordTooShort",
-                            Description = "Passwords must be at least 8 characters.",
+                            Description = "Passwords must be at least 8 characters."
                         },
                         new IdentityError
                         {
                             Code = "PasswordRequiresNonAlphanumeric",
-                            Description = "Passwords must have at least one non alphanumeric character.",
+                            Description = "Passwords must have at least one non alphanumeric character."
                         },
                         new IdentityError
                         {
                             Code = "PasswordRequiresDigit",
-                            Description = "Passwords must have at least one digit ('0'-'9').",
+                            Description = "Passwords must have at least one digit ('0'-'9')."
                         },
                         new IdentityError
                         {
                             Code = "PasswordRequiresUpper",
-                            Description = "Passwords must have at least one uppercase ('A'-'Z').",
-                        },
+                            Description = "Passwords must have at least one uppercase ('A'-'Z')."
+                        }
                     }
-                },
+                }
             };
 
         [Fact]
-        public async Task GetClients()
+        public async Task GetUsers()
         {
             // Act
-            var (res, actual) = await Get<List<ClientView>>("clients");
+            var (res, actual) = await Get<List<UserView>>("users");
 
             // Assert
             res.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminClientView);
+            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
         }
 
         [Theory]
         [MemberData(nameof(AccountInfoErrorData))]
         [MemberData(nameof(PasswordErrorData))]
-        public async Task PostClientError(ClientPostView data, IEnumerable<IdentityError> expected)
+        public async Task PostUserError(UserPostView data, IEnumerable<IdentityError> expected)
         {
             // Act
-            var (response, actual) = await Post<List<IdentityError>>("clients", data);
+            var (response, actual) = await Post<List<IdentityError>>("users", data);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -118,68 +118,68 @@ namespace Tests
         #region Post
 
         [Fact]
-        public async Task PostClient()
+        public async Task PostUser()
         {
             // Arrange
-            var data = new ClientPostView
+            var data = new UserPostView
             {
                 Email = "caio.souza@puchealth.com.br",
                 Name = "Caio Souza",
-                Password = "Passw0000000rd!",
+                Password = "Passw0000000rd!"
             };
 
             // Act
-            var (response, actual) = await Post<ClientView>("clients", data);
+            var (response, actual) = await Post<UserView>("users", data);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(new ClientView
+            actual.Should().BeEquivalentTo(new UserView
             {
                 Id = MockedEnv.CreateGuid(1),
                 Email = data.Email,
-                Name = data.Name,
+                Name = data.Name
             });
         }
 
         [Fact]
-        public async Task GetClientAfterPost()
+        public async Task GetUserAfterPost()
         {
             // Arrange
-            await PostClient();
+            await PostUser();
 
             // Act
-            var (response, actual) = await Get<ClientView>($"clients/{MockedEnv.CreateGuid(1)}");
+            var (response, actual) = await Get<UserView>($"users/{MockedEnv.CreateGuid(1)}");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(new ClientView
+            actual.Should().BeEquivalentTo(new UserView
             {
                 Id = MockedEnv.CreateGuid(1),
                 Email = "caio.souza@puchealth.com.br",
-                Name = "Caio Souza",
+                Name = "Caio Souza"
             });
         }
 
         [Fact]
-        public async Task GetClientListAfterPost()
+        public async Task GetUserListAfterPost()
         {
             // Arrange
-            await PostClient();
+            await PostUser();
 
             // Act
-            var (response, actual) = await Get<List<ClientView>>("clients");
+            var (response, actual) = await Get<List<UserView>>("users");
 
             // Assert
             response.EnsureSuccessStatusCode();
             actual.Should().BeEquivalentTo(new[]
                 {
-                    IEnv.AdminClientView,
-                    new ClientView
+                    IEnv.AdminUserView,
+                    new UserView
                     {
                         Id = MockedEnv.CreateGuid(1),
                         Email = "caio.souza@puchealth.com.br",
-                        Name = "Caio Souza",
-                    },
+                        Name = "Caio Souza"
+                    }
                 }, options => options.WithStrictOrdering()
             );
         }
@@ -190,13 +190,13 @@ namespace Tests
 
         [Theory]
         [MemberData(nameof(AccountInfoErrorData))]
-        public async Task PutClientError(ClientPostView data, IEnumerable<IdentityError> expected)
+        public async Task PutUserError(UserPostView data, IEnumerable<IdentityError> expected)
         {
             // Arrange
-            await PostClient();
+            await PostUser();
 
             // Act
-            var (response, actual) = await Put<List<IdentityError>>($"clients/{MockedEnv.CreateGuid(1)}", data);
+            var (response, actual) = await Put<List<IdentityError>>($"users/{MockedEnv.CreateGuid(1)}", data);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -204,102 +204,102 @@ namespace Tests
         }
 
         [Fact]
-        public async Task PutClient()
+        public async Task PutUser()
         {
             // Arrange
-            await PostClient();
+            await PostUser();
 
-            var data = new ClientPutView
+            var data = new UserPutView
             {
                 Email = "philipe.souza@puchealth.com.br",
-                Name = "Philipe Souza",
+                Name = "Philipe Souza"
             };
 
             // Act
-            var (response, actual) = await Put<ClientView>($"clients/{MockedEnv.CreateGuid(1)}", data);
+            var (response, actual) = await Put<UserView>($"users/{MockedEnv.CreateGuid(1)}", data);
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(new ClientView
+            actual.Should().BeEquivalentTo(new UserView
             {
                 Id = MockedEnv.CreateGuid(1),
                 Email = data.Email,
-                Name = data.Name,
+                Name = data.Name
             });
         }
 
         [Fact]
-        public async Task GetClientAfterPut()
+        public async Task GetUserAfterPut()
         {
             // Arrange
-            await PutClient();
+            await PutUser();
 
             // Act
-            var (response, actual) = await Get<ClientView>($"clients/{MockedEnv.CreateGuid(1)}");
+            var (response, actual) = await Get<UserView>($"users/{MockedEnv.CreateGuid(1)}");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(new ClientView
+            actual.Should().BeEquivalentTo(new UserView
             {
                 Id = MockedEnv.CreateGuid(1),
                 Email = "philipe.souza@puchealth.com.br",
-                Name = "Philipe Souza",
+                Name = "Philipe Souza"
             });
         }
 
         [Fact]
-        public async Task GetClientListAfterPut()
+        public async Task GetUserListAfterPut()
         {
             // Arrange
-            await PutClient();
+            await PutUser();
 
             // Act
-            var (response, actual) = await Get<List<ClientView>>("clients");
+            var (response, actual) = await Get<List<UserView>>("users");
 
             // Assert
             response.EnsureSuccessStatusCode();
             actual.Should().BeEquivalentTo(new[]
                 {
-                    IEnv.AdminClientView,
-                    new ClientView
+                    IEnv.AdminUserView,
+                    new UserView
                     {
                         Id = MockedEnv.CreateGuid(1),
                         Email = "philipe.souza@puchealth.com.br",
-                        Name = "Philipe Souza",
-                    },
+                        Name = "Philipe Souza"
+                    }
                 }, options => options.WithStrictOrdering()
             );
         }
 
         [Fact]
-        public async Task PutClientNotFound()
+        public async Task PutUserNotFound()
         {
             // Arrange
-            var data = new ClientPutView
+            var data = new UserPutView
             {
                 Email = "philipe.souza@puchealth.com.br",
-                Name = "Philipe Souza",
+                Name = "Philipe Souza"
             };
 
             // Act
-            var (response, _) = await PutResultAsString($"clients/{MockedEnv.CreateGuid(666)}", data);
+            var (response, _) = await PutResultAsString($"users/{MockedEnv.CreateGuid(666)}", data);
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]
-        public async Task GetClientListAfterPutNotFound()
+        public async Task GetUserListAfterPutNotFound()
         {
             // Arrange
-            await PutClientNotFound();
+            await PutUserNotFound();
 
             // Act
-            var (response, actual) = await Get<List<ClientView>>("clients");
+            var (response, actual) = await Get<List<UserView>>("users");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminClientView);
+            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
         }
 
         #endregion
@@ -310,7 +310,7 @@ namespace Tests
         public async Task DeleteNonExistent()
         {
             // Act
-            var (response, _) = await Delete($"clients/{MockedEnv.CreateGuid(666)}");
+            var (response, _) = await Delete($"users/{MockedEnv.CreateGuid(666)}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -320,40 +320,40 @@ namespace Tests
         public async Task DeleteExistent()
         {
             // Arrange
-            await PostClient();
+            await PostUser();
 
             // Act
-            var (response, _) = await Delete($"clients/{MockedEnv.CreateGuid(1)}");
+            var (response, _) = await Delete($"users/{MockedEnv.CreateGuid(1)}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task GetClientAfterDelete()
+        public async Task GetUserAfterDelete()
         {
             // Arrange
             await DeleteExistent();
 
             // Act
-            var (response, _) = await GetResultAsString($"clients/{MockedEnv.CreateGuid(1)}");
+            var (response, _) = await GetResultAsString($"users/{MockedEnv.CreateGuid(1)}");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         [Fact]
-        public async Task GetClientListAfterDelete()
+        public async Task GetUserListAfterDelete()
         {
             // Arrange
             await DeleteExistent();
 
             // Act
-            var (response, actual) = await Get<List<ClientView>>("clients");
+            var (response, actual) = await Get<List<UserView>>("users");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminClientView);
+            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
         }
 
         #endregion

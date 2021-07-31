@@ -23,8 +23,10 @@ namespace puchealth
     {
         private readonly IConfiguration _configuration;
 
-        public Startup(IConfiguration configuration) =>
+        public Startup(IConfiguration configuration)
+        {
             _configuration = configuration;
+        }
 
         public static TokenValidationParameters JwtValidationParameters =>
             new()
@@ -35,7 +37,7 @@ namespace puchealth
                 ValidIssuer = IEnv.JwtIssuer,
                 ValidateAudience = true,
                 ValidAudience = IEnv.JwtAudience,
-                ValidateLifetime = true,
+                ValidateLifetime = true
             };
 
         public void ConfigureServices(IServiceCollection services)
@@ -47,13 +49,13 @@ namespace puchealth
                 options => options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection"))
             );
 
-            services.AddScoped<Client>();
+            services.AddScoped<User>();
             services.AddScoped<Role>();
 
             services.AddSingleton<IEnv, Env>();
             services.AddSingleton<IProductSeed, ProductSeed>();
 
-            services.AddIdentity<Client, Role>()
+            services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<Context>()
                 .AddDefaultTokenProviders();
 
@@ -95,7 +97,7 @@ namespace puchealth
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Magazine Luiza | Bookmark API", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Puchealth | Bookmark API", Version = "v1"});
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -105,7 +107,7 @@ namespace puchealth
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
+                    Scheme = "Bearer"
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -116,14 +118,14 @@ namespace puchealth
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
+                                Id = "Bearer"
                             },
                             Scheme = "oauth2",
                             Name = "Bearer",
-                            In = ParameterLocation.Header,
+                            In = ParameterLocation.Header
                         },
                         new List<string>()
-                    },
+                    }
                 });
             });
         }
@@ -135,7 +137,7 @@ namespace puchealth
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Magazine Luiza | Bookmarks Api | v1"));
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Puchealth | Bookmarks Api | v1"));
             }
 
             app.UseHttpsRedirection();
@@ -164,7 +166,7 @@ namespace puchealth
 
         public static async Task MigrateAndSeed(IApplicationBuilder app)
         {
-            // Create the database if it not exists and migrate
+            // Create the database if it doesn't exist and migrate it
             using (var serviceScopeDb = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 await using var context = serviceScopeDb.ServiceProvider.GetRequiredService<Context>();
@@ -188,32 +190,19 @@ namespace puchealth
 
             using (var serviceScopeUser = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
-                using var userManager = serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<Client>>();
+                using var userManager = serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-                if (userManager.FindByEmailAsync(IEnv.AdminClientView.Email).Result is null)
+                if (userManager.FindByEmailAsync(IEnv.AdminUserView.Email).Result is null)
                 {
-                    var admin = new Client
+                    var admin = new User
                     {
-                        Id = IEnv.AdminClientView.Id,
-                        Name = IEnv.AdminClientView.Name,
-                        UserName = IEnv.AdminClientView.Email,
-                        Email = IEnv.AdminClientView.Email,
+                        Id = IEnv.AdminUserView.Id,
+                        Name = IEnv.AdminUserView.Name,
+                        UserName = IEnv.AdminUserView.Email,
+                        Email = IEnv.AdminUserView.Email
                     };
                     await userManager.CreateAsync(admin, "Supersecretpassw000rd!");
                     await userManager.AddToRoleAsync(admin, IEnv.RoleAdmin);
-                }
-            }
-
-            // Create products
-            using (var serviceScopeProducts = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
-            {
-                await using var context = serviceScopeProducts.ServiceProvider.GetRequiredService<Context>();
-                if (!await context.Product.AnyAsync())
-                {
-                    var productSeed = serviceScopeProducts.ServiceProvider.GetRequiredService<IProductSeed>();
-                    foreach (var line in productSeed.SqlSeed())
-                        await context.Database.ExecuteSqlRawAsync(line);
-                    await context.SaveChangesAsync();
                 }
             }
         }

@@ -11,7 +11,7 @@ using puchealth.Services;
 
 namespace puchealth.Controllers
 {
-    public class ClientLogin
+    public class UserLogin
     {
         public string Email { get; init; } = default!;
 
@@ -21,17 +21,20 @@ namespace puchealth.Controllers
     [Route("v1/[controller]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<Client> _userManager;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(UserManager<Client> userManager) => _userManager = userManager;
+        public AccountController(UserManager<User> userManager)
+        {
+            _userManager = userManager;
+        }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("login")]
-        public async Task<ActionResult<string>> Authenticate([FromBody] ClientLogin client)
+        public async Task<ActionResult<string>> Authenticate([FromBody] UserLogin user)
         {
-            var userIdentity = await _userManager.FindByEmailAsync(client.Email);
-            if (userIdentity is null || !await _userManager.CheckPasswordAsync(userIdentity, client.Password))
+            var userIdentity = await _userManager.FindByEmailAsync(user.Email);
+            if (userIdentity is null || !await _userManager.CheckPasswordAsync(userIdentity, user.Password))
                 return Unauthorized();
 
             var role = await _userManager.IsInRoleAsync(userIdentity, IEnv.RoleAdmin)
@@ -45,12 +48,12 @@ namespace puchealth.Controllers
                     new(ClaimTypes.Name, userIdentity.Name),
                     new(ClaimTypes.NameIdentifier, userIdentity.Id.ToString()),
                     new(ClaimTypes.Email, userIdentity.Email),
-                    new(ClaimTypes.Role, role),
+                    new(ClaimTypes.Role, role)
                 }),
                 Expires = DateTime.UtcNow.AddHours(24),
                 SigningCredentials = new SigningCredentials(IEnv.JwtKey, SecurityAlgorithms.HmacSha256Signature),
                 Issuer = IEnv.JwtIssuer,
-                Audience = IEnv.JwtAudience,
+                Audience = IEnv.JwtAudience
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

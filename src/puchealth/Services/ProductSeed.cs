@@ -5,7 +5,9 @@ namespace puchealth.Services
 {
     public class ProductSeed : IProductSeed
     {
-        public IEnumerable<string> SqlSeed() =>
-            Enumerable.Empty<string>();
+        public IEnumerable<string> SqlSeed()
+        {
+            return Enumerable.Empty<string>();
+        }
     }
 }
