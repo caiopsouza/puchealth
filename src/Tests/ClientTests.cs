@@ -327,7 +327,7 @@ namespace Tests
             var (response, _) = await Delete($"users/{MockedEnv.CreateGuid(1)}");
 
             // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
         [Fact]
@@ -353,7 +353,7 @@ namespace Tests
             var (response, actual) = await Get<List<UserView>>("users");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
             actual.Should().BeEquivalentTo(IEnv.AdminUserView);
         }
 

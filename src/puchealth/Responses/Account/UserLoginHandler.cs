@@ -29,7 +29,7 @@ namespace puchealth.Responses.Account
 
             var role = await _userManager.IsInRoleAsync(userIdentity, IEnv.RoleAdmin)
                 ? IEnv.RoleAdmin
-                : IEnv.RoleClient;
+                : IEnv.RoleUser;
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

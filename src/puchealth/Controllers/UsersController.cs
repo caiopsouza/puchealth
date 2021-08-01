@@ -24,7 +24,7 @@ namespace puchealth.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = IEnv.RoleAny)]
+        [Authorize(Roles = IEnv.AccessAdmin)]
         [Route("")]
         public async Task<IEnumerable<UserView>> GetAll()
         {
@@ -32,7 +32,7 @@ namespace puchealth.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = IEnv.RoleAny)]
+        [Authorize(Roles = IEnv.AccessAdmin)]
         [Route("{id:guid}")]
         [ProducesResponseType(typeof(UserView), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -51,18 +51,21 @@ namespace puchealth.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = IEnv.RoleAdmin)]
+        [Authorize(Roles = IEnv.AccessAdmin)]
         [Route("")]
         [ProducesResponseType(typeof(UserView), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(IEnumerable<IdentityError>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post([FromBody] UserPost data)
         {
             return (await _mediator.Send(data))
-                .Match<ActionResult>(Ok, BadRequestFromIdentityErrors);
+                .Match<ActionResult>(
+                    user => Created($"v1/users/{user.Id}/", user),
+                    BadRequestFromIdentityErrors
+                );
         }
 
         [HttpPut]
-        [Authorize(Roles = IEnv.RoleAdmin)]
+        [Authorize(Roles = IEnv.AccessAdmin)]
         [Route("{id:guid}")]
         [ProducesResponseType(typeof(UserView), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,18 +74,18 @@ namespace puchealth.Controllers
         {
             data.Id = id;
             return (await _mediator.Send(data))
-                .Match<ActionResult>(user => user == null ? NotFound() : Ok(user), BadRequestFromIdentityErrors);
+                .Match<ActionResult>(user => user != null ? Ok(user) : NotFound(), BadRequestFromIdentityErrors);
         }
 
         [HttpDelete]
-        [Authorize(Roles = IEnv.RoleAdmin)]
+        [Authorize(Roles = IEnv.AccessAdmin)]
         [Route("{id:guid}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(Guid id)
         {
             var res = await _mediator.Send(new UserDelete(id));
-            return res ? Ok() : NotFound();
+            return res ? NoContent() : NotFound();
         }
     }
 }

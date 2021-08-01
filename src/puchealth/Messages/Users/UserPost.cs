@@ -11,10 +11,10 @@ namespace puchealth.Messages.Users
     [AutoMap(typeof(User), ReverseMap = true)]
     public class UserPost : IRequest<OneOf<UserView, IEnumerable<IdentityError>>>
     {
-        public string Name { get; init; }
+        public string Name { get; init; } = null!;
 
-        public string Email { get; init; }
+        public string Email { get; init; } = null!;
 
-        public string Password { get; init; }
+        public string Password { get; init; } = null!;
     }
 }

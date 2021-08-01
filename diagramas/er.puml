@@ -5,7 +5,7 @@ left to right direction
 hide circle
 
 ' avoid problems with angled crows feet
-' skinparam linetype ortho
+skinparam linetype ortho
 
 entity "Endereço" as endereco {
   *Id : Guid <<generated>>

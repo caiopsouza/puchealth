@@ -4,9 +4,6 @@ left to right direction
 ' hide the spot
 hide circle
 
-' avoid problems with angled crows feet
-' skinparam linetype ortho
-
 ' hide visibility icon
 skinparam classAttributeIconSize 0
 
@@ -25,10 +22,9 @@ class "Endereço" as endereco {
 }
 
 enum "NivelPermissão" as permissao <<enum>> {
-    Paciente: Int = 1
-    Profissional: Int = 2
-    Administrador: Int = 3
-    SuperAdministrador: Int = 4
+    Usuario: Int = 1
+    Administrador: Int = 2
+    SuperAdministrador: Int = 3
     --
     IsPaciente(): Bool
     IsProfissional(): Bool

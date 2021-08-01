@@ -54,7 +54,6 @@ namespace puchealth
             services.AddScoped<Role>();
 
             services.AddSingleton<IEnv, Env>();
-            services.AddSingleton<IProductSeed, ProductSeed>();
 
             services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<Context>()
@@ -100,7 +99,8 @@ namespace puchealth
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Puchealth | Bookmark API", Version = "v1"});
+                c.SwaggerDoc("v1",
+                    new OpenApiInfo {Title = "PUC Engenharia de Software | Puchealth API", Version = "v1"});
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -140,7 +140,7 @@ namespace puchealth
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Puchealth | Bookmarks Api | v1"));
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PUC Engenharia de Software | Puchealth API | v1"));
             }
 
             app.UseHttpsRedirection();
@@ -183,12 +183,8 @@ namespace puchealth
                 using var roleManager = serviceScopeRole.ServiceProvider.GetRequiredService<RoleManager<Role>>();
 
                 if (await roleManager.FindByNameAsync(IEnv.RoleAdmin) is null)
-                {
                     await roleManager.CreateAsync(new Role(new Guid("44b23886-c13a-49b4-9680-c0a6fddb3812"),
                         IEnv.RoleAdmin));
-                    await roleManager.CreateAsync(
-                        new Role(new Guid("180b8ec6-d32e-4b25-93ad-ce45d7567bdd"), IEnv.RoleClient));
-                }
             }
 
             using (var serviceScopeUser = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())

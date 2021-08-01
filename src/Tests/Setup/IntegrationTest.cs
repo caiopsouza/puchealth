@@ -109,8 +109,7 @@ namespace Tests.Setup
                     var servicesToRemove = new[]
                     {
                         typeof(DbContextOptions<Context>),
-                        typeof(IEnv),
-                        typeof(IProductSeed)
+                        typeof(IEnv)
                     };
 
                     foreach (var service in servicesToRemove)
@@ -123,9 +122,6 @@ namespace Tests.Setup
 
                     // Replace with the mocked environment
                     services.AddSingleton<IEnv, MockedEnv>();
-
-                    // Mocked seed
-                    services.AddScoped<IProductSeed, ProductSeed>();
                 })
             );
 

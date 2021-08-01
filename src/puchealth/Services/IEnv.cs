@@ -9,13 +9,17 @@ namespace puchealth.Services
     {
         // Jwt info
         public const string JwtAudience = "puchealth";
-
         public const string JwtIssuer = "puchealth.issuer";
 
         // Roles
-        public const string RoleClient = "client";
+        public const string RoleUser = "user";
         public const string RoleAdmin = "admin";
-        public const string RoleAny = "admin,client";
+        public const string RoleSuper = "super";
+
+        // Access to
+        public const string AccessUser = "user,admin,super";
+        public const string AccessAdmin = "admin,super";
+        public const string AccessSuper = "super";
 
         // Admin has a fixed Id for convenience
         public static readonly UserView AdminUserView = new()

@@ -20,14 +20,11 @@ namespace Tests
         public static TheoryData<string, string, string, bool> PermissionData => new()
         {
             {"account", "login", "post", true},
-            {"users", "", "get", true},
-            {"users", "/00000001-0000-0000-0000-000000000000", "get", true},
+            {"users", "", "get", false},
+            {"users", "/00000001-0000-0000-0000-000000000000", "get", false},
             {"users", "", "post", false},
             {"users", "/00000001-0000-0000-0000-000000000000", "put", false},
-            {"users", "/00000001-0000-0000-0000-000000000000", "delete", false},
-            {"bookmarks", "", "get", true},
-            {"bookmarks", "/00000001-0000-0000-0000-000000000000", "post", true},
-            {"bookmarks", "/00000001-0000-0000-0000-000000000000", "delete", true}
+            {"users", "/00000001-0000-0000-0000-000000000000", "delete", false}
         };
 
         [Fact]
