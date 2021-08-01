@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,7 +45,10 @@ namespace puchealth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(opts =>
+                    opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+                );
 
             services.AddDbContext<Context>(
                 options => options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection"))
@@ -192,16 +196,56 @@ namespace puchealth
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 await using var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
+
+                // Procedimento
+                if (!await context.Procedimentos.AnyAsync(e => e.Id == IEnv.Procedimento.Id))
+                    context.Procedimentos.Add(new Procedimento
+                    {
+                        Id = IEnv.Procedimento.Id,
+                        Name = IEnv.Procedimento.Name,
+                        Descricao = IEnv.Procedimento.Descricao,
+                        Tipo = IEnv.Procedimento.Tipo
+                    });
+
+                // Especialidades
                 if (!await context.Especialidades.AnyAsync(e => e.Id == IEnv.Radiologia.Id))
-                {
                     context.Especialidades.Add(new Especialidade
                     {
                         Id = IEnv.Radiologia.Id,
                         Name = IEnv.Radiologia.Name,
-                        Descricao = IEnv.Radiologia.Descricao,
+                        Descricao = IEnv.Radiologia.Descricao
                     });
-                    await context.SaveChangesAsync();
-                }
+
+                // Endereços
+                foreach (var endereco in new[] {IEnv.EnderecoEstab1, IEnv.EnderecoEstab2})
+                    if (!await context.Enderecos.AnyAsync(e => e.Id == endereco.Id))
+                        context.Enderecos.Add(new Endereco
+                        {
+                            Id = endereco.Id,
+                            Rua = endereco.Rua,
+                            Numero = endereco.Numero,
+                            Bairro = endereco.Bairro,
+                            Cidade = endereco.Cidade,
+                            Estado = endereco.Estado,
+                            CEP = endereco.CEP
+                        });
+
+                // Estabelecimentos
+                var estabelecimentos = new[]
+                    {(IEnv.Estabelecimento1, IEnv.EnderecoEstab1), (IEnv.Estabelecimento2, IEnv.EnderecoEstab2)};
+
+                foreach (var (estabelecimento, endereco) in estabelecimentos)
+                    if (!await context.Estabelecimentos.AnyAsync(e => e.Id == estabelecimento.Id))
+                        context.Estabelecimentos.Add(new Estabelecimento
+                        {
+                            Id = estabelecimento.Id,
+                            Nome = estabelecimento.Nome,
+                            RazaoSocial = estabelecimento.RazaoSocial,
+                            Tipo = estabelecimento.Tipo,
+                            EnderecoId = endereco.Id
+                        });
+
+                await context.SaveChangesAsync();
             }
 
             // Create roles
@@ -263,20 +307,41 @@ namespace puchealth
                     serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<Profissional>>();
 
                 // Create a super-admin
-                if (profissionalManager.FindByEmailAsync(IEnv.ProfissionalView.Email).Result is null)
+                if (profissionalManager.FindByEmailAsync(IEnv.Radiologista.Email).Result is null)
                 {
                     var profissional = new Profissional
                     {
-                        Id = IEnv.ProfissionalView.Id,
-                        Name = IEnv.ProfissionalView.Name,
-                        UserName = IEnv.ProfissionalView.Email,
-                        Email = IEnv.ProfissionalView.Email,
-                        Tipo = IEnv.ProfissionalView.Tipo,
-                        EspecialidadeId = IEnv.ProfissionalView.Especialidade.Id
+                        Id = IEnv.Radiologista.Id,
+                        Name = IEnv.Radiologista.Name,
+                        UserName = IEnv.Radiologista.Email,
+                        Email = IEnv.Radiologista.Email,
+                        Tipo = IEnv.Radiologista.Tipo,
+                        EspecialidadeId = IEnv.Radiologista.Especialidade.Id
                     };
                     await profissionalManager.CreateAsync(profissional, "Profissionalpassw000rd!");
                     await profissionalManager.AddToRoleAsync(profissional, IEnv.RoleUser);
                 }
+            }
+
+            // Create data that depends on users
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
+            {
+                await using var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
+
+                // Procedimentos oferecidos
+                foreach (var oferecido in new[] {IEnv.ProcedimentoOfer1, IEnv.ProcedimentoOfer2})
+                    if (!await context.ProcedimentosOferecidos.AnyAsync(e => e.Id == oferecido.Id))
+                        context.ProcedimentosOferecidos.Add(new ProcedimentoOferecido
+                        {
+                            Id = oferecido.Id,
+                            ProcedimentoId = oferecido.Procedimento.Id,
+                            EstabelecimentoId = oferecido.Estabelecimento.Id,
+                            ProfissionalId = oferecido.Profissional.Id,
+                            Horario = oferecido.Horario,
+                            Duracao = new TimeSpan(0, 0, (int) oferecido.Duracao)
+                        });
+
+                await context.SaveChangesAsync();
             }
         }
     }

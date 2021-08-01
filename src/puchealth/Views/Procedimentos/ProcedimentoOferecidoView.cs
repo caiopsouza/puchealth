@@ -1,16 +1,20 @@
 ﻿using System;
-using AutoMapper;
-using puchealth.Models;
+using puchealth.Views.Users;
 
 namespace puchealth.Views.Procedimentos
 {
-    [AutoMap(typeof(Procedimento))]
     public class ProcedimentoOferecidoView
     {
         public Guid Id { get; init; }
 
-        public string Name { get; init; } = null!;
+        public ProcedimentoView Procedimento { get; set; }
 
-        public string Email { get; init; } = null!;
+        public EstabelecimentoView Estabelecimento { get; set; }
+
+        public ProfissionalView Profissional { get; set; }
+
+        public DateTime Horario { get; set; }
+
+        public double Duracao { get; set; }
     }
 }

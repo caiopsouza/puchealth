@@ -120,6 +120,41 @@ namespace puchealth.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("puchealth.Models.Endereco", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Bairro")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CEP")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cidade")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Numero")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Rua")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Enderecos");
+                });
+
             modelBuilder.Entity("puchealth.Models.Especialidade", b =>
                 {
                     b.Property<Guid>("Id")
@@ -138,6 +173,33 @@ namespace puchealth.Migrations
                     b.ToTable("Especialidades");
                 });
 
+            modelBuilder.Entity("puchealth.Models.Estabelecimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EnderecoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RazaoSocial")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnderecoId");
+
+                    b.ToTable("Estabelecimentos");
+                });
+
             modelBuilder.Entity("puchealth.Models.Procedimento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -151,9 +213,44 @@ namespace puchealth.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Procedimentos");
+                });
+
+            modelBuilder.Entity("puchealth.Models.ProcedimentoOferecido", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeSpan>("Duracao")
+                        .HasColumnType("interval");
+
+                    b.Property<Guid>("EstabelecimentoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Horario")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ProcedimentoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProfissionalId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EstabelecimentoId");
+
+                    b.HasIndex("ProcedimentoId");
+
+                    b.HasIndex("ProfissionalId");
+
+                    b.ToTable("ProcedimentosOferecidos");
                 });
 
             modelBuilder.Entity("puchealth.Models.Role", b =>
@@ -331,6 +428,44 @@ namespace puchealth.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("puchealth.Models.Estabelecimento", b =>
+                {
+                    b.HasOne("puchealth.Models.Endereco", "Endereco")
+                        .WithMany()
+                        .HasForeignKey("EnderecoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Endereco");
+                });
+
+            modelBuilder.Entity("puchealth.Models.ProcedimentoOferecido", b =>
+                {
+                    b.HasOne("puchealth.Models.Estabelecimento", "Estabelecimento")
+                        .WithMany()
+                        .HasForeignKey("EstabelecimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("puchealth.Models.Procedimento", "Procedimento")
+                        .WithMany()
+                        .HasForeignKey("ProcedimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("puchealth.Models.Profissional", "Profissional")
+                        .WithMany()
+                        .HasForeignKey("ProfissionalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Estabelecimento");
+
+                    b.Navigation("Procedimento");
+
+                    b.Navigation("Profissional");
                 });
 
             modelBuilder.Entity("puchealth.Models.Profissional", b =>

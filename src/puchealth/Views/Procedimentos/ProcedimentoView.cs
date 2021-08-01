@@ -1,8 +1,11 @@
-using System;
+﻿using System;
+using AutoMapper;
+using puchealth.Models;
 
-namespace puchealth.Models
+namespace puchealth.Views.Procedimentos
 {
-    public class Procedimento
+    [AutoMap(typeof(Procedimento))]
+    public class ProcedimentoView
     {
         public Guid Id { get; init; }
 

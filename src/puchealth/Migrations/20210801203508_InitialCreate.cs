@@ -23,6 +23,23 @@ namespace puchealth.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Enderecos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Rua = table.Column<string>(type: "text", nullable: false),
+                    Numero = table.Column<string>(type: "text", nullable: false),
+                    Bairro = table.Column<string>(type: "text", nullable: false),
+                    Cidade = table.Column<string>(type: "text", nullable: false),
+                    Estado = table.Column<string>(type: "text", nullable: false),
+                    CEP = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Enderecos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Especialidades",
                 columns: table => new
                 {
@@ -41,7 +58,8 @@ namespace puchealth.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Descricao = table.Column<string>(type: "text", nullable: true)
+                    Descricao = table.Column<string>(type: "text", nullable: true),
+                    Tipo = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -65,6 +83,27 @@ namespace puchealth.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Estabelecimentos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Nome = table.Column<string>(type: "text", nullable: false),
+                    RazaoSocial = table.Column<string>(type: "text", nullable: false),
+                    Tipo = table.Column<int>(type: "integer", nullable: false),
+                    EnderecoId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Estabelecimentos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Estabelecimentos_Enderecos_EnderecoId",
+                        column: x => x.EnderecoId,
+                        principalTable: "Enderecos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -189,6 +228,40 @@ namespace puchealth.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ProcedimentosOferecidos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProcedimentoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EstabelecimentoId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProfissionalId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Horario = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Duracao = table.Column<TimeSpan>(type: "interval", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcedimentosOferecidos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProcedimentosOferecidos_AspNetUsers_ProfissionalId",
+                        column: x => x.ProfissionalId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProcedimentosOferecidos_Estabelecimentos_EstabelecimentoId",
+                        column: x => x.EstabelecimentoId,
+                        principalTable: "Estabelecimentos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProcedimentosOferecidos_Procedimentos_ProcedimentoId",
+                        column: x => x.ProcedimentoId,
+                        principalTable: "Procedimentos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -235,6 +308,26 @@ namespace puchealth.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Estabelecimentos_EnderecoId",
+                table: "Estabelecimentos",
+                column: "EnderecoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcedimentosOferecidos_EstabelecimentoId",
+                table: "ProcedimentosOferecidos",
+                column: "EstabelecimentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcedimentosOferecidos_ProcedimentoId",
+                table: "ProcedimentosOferecidos",
+                column: "ProcedimentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcedimentosOferecidos_ProfissionalId",
+                table: "ProcedimentosOferecidos",
+                column: "ProfissionalId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -255,7 +348,7 @@ namespace puchealth.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Procedimentos");
+                name: "ProcedimentosOferecidos");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -264,7 +357,16 @@ namespace puchealth.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+                name: "Estabelecimentos");
+
+            migrationBuilder.DropTable(
+                name: "Procedimentos");
+
+            migrationBuilder.DropTable(
                 name: "Especialidades");
+
+            migrationBuilder.DropTable(
+                name: "Enderecos");
         }
     }
 }
