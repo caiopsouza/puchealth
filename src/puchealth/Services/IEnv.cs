@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using puchealth.Controllers;
+using puchealth.Views.Users;
 
 namespace puchealth.Services
 {

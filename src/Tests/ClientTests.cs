@@ -5,8 +5,9 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using puchealth;
-using puchealth.Controllers;
+using puchealth.Messages.Users;
 using puchealth.Services;
+using puchealth.Views.Users;
 using Tests.Setup;
 using Xunit;
 
@@ -18,11 +19,11 @@ namespace Tests
         {
         }
 
-        public static TheoryData<UserPostView, IEnumerable<IdentityError>> AccountInfoErrorData =>
+        public static TheoryData<UserPost, IEnumerable<IdentityError>> AccountInfoErrorData =>
             new()
             {
                 {
-                    new UserPostView
+                    new UserPost
                     {
                         Name = "Caio Souza",
                         Email = "admin@puchealth.com.br",
@@ -39,7 +40,7 @@ namespace Tests
                 },
 
                 {
-                    new UserPostView
+                    new UserPost
                     {
                         Name = "Caio Souza",
                         Email = "caio.souza.puchealth.com.br",
@@ -55,11 +56,11 @@ namespace Tests
                 }
             };
 
-        public static TheoryData<UserPostView, IEnumerable<IdentityError>> PasswordErrorData =>
+        public static TheoryData<UserPost, IEnumerable<IdentityError>> PasswordErrorData =>
             new()
             {
                 {
-                    new UserPostView
+                    new UserPost
                     {
                         Name = "Caio Souza",
                         Email = "caio.souza@puchealth.com.br",
@@ -105,7 +106,7 @@ namespace Tests
         [Theory]
         [MemberData(nameof(AccountInfoErrorData))]
         [MemberData(nameof(PasswordErrorData))]
-        public async Task PostUserError(UserPostView data, IEnumerable<IdentityError> expected)
+        public async Task PostUserError(UserPost data, IEnumerable<IdentityError> expected)
         {
             // Act
             var (response, actual) = await Post<List<IdentityError>>("users", data);
@@ -121,7 +122,7 @@ namespace Tests
         public async Task PostUser()
         {
             // Arrange
-            var data = new UserPostView
+            var data = new UserPost
             {
                 Email = "caio.souza@puchealth.com.br",
                 Name = "Caio Souza",
@@ -190,7 +191,7 @@ namespace Tests
 
         [Theory]
         [MemberData(nameof(AccountInfoErrorData))]
-        public async Task PutUserError(UserPostView data, IEnumerable<IdentityError> expected)
+        public async Task PutUserError(UserPost data, IEnumerable<IdentityError> expected)
         {
             // Arrange
             await PostUser();
@@ -209,7 +210,7 @@ namespace Tests
             // Arrange
             await PostUser();
 
-            var data = new UserPutView
+            var data = new UserPut
             {
                 Email = "philipe.souza@puchealth.com.br",
                 Name = "Philipe Souza"
@@ -275,7 +276,7 @@ namespace Tests
         public async Task PutUserNotFound()
         {
             // Arrange
-            var data = new UserPutView
+            var data = new UserPut
             {
                 Email = "philipe.souza@puchealth.com.br",
                 Name = "Philipe Souza"

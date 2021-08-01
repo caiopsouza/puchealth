@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -73,6 +74,8 @@ namespace puchealth
             services.AddHttpClient();
 
             services.AddAutoMapper(Assembly.GetAssembly(typeof(Startup)));
+
+            services.AddMediatR(typeof(Startup));
 
             services.Configure<IdentityOptions>(options =>
             {

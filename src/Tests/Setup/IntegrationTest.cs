@@ -10,9 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using puchealth;
-using puchealth.Controllers;
+using puchealth.Messages.Account;
+using puchealth.Messages.Users;
 using puchealth.Persistence;
 using puchealth.Services;
+using puchealth.Views.Users;
 using Xunit;
 
 namespace Tests.Setup
@@ -135,7 +137,7 @@ namespace Tests.Setup
         // Login as the user
         protected async Task<(HttpResponseMessage, string)> LoginHttpResponse(string email, string password)
         {
-            var loginData = new UserLogin
+            var loginData = new AccountLogin
             {
                 Email = email,
                 Password = password
@@ -153,14 +155,14 @@ namespace Tests.Setup
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        protected readonly UserPostView _alice = new()
+        protected readonly UserPost _alice = new()
         {
             Email = "alice@other.company.com",
             Name = "Alice",
             Password = "AliceSecretPassw000rd!"
         };
 
-        private readonly UserPostView _bob = new()
+        private readonly UserPost _bob = new()
         {
             Email = "bob@other.company.com",
             Name = "Bob",
@@ -177,7 +179,7 @@ namespace Tests.Setup
             return (await Post<UserView>("users", _bob)).Item2;
         }
 
-        protected async Task LoginAsAdmin()
+        private async Task LoginAsAdmin()
         {
             await Login(IEnv.AdminUserView.Email, "Supersecretpassw000rd!");
         }

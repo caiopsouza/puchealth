@@ -1,65 +1,28 @@
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using puchealth.Models;
-using puchealth.Services;
+using puchealth.Messages.Account;
 
 namespace puchealth.Controllers
 {
-    public class UserLogin
-    {
-        public string Email { get; init; } = default!;
-
-        public string Password { get; init; } = default!;
-    }
-
     [Route("v1/[controller]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<User> _userManager;
+        private readonly IMediator _mediator;
 
-        public AccountController(UserManager<User> userManager)
+        public AccountController(IMediator mediator)
         {
-            _userManager = userManager;
+            _mediator = mediator;
         }
 
         [HttpPost]
         [AllowAnonymous]
         [Route("login")]
-        public async Task<ActionResult<string>> Authenticate([FromBody] UserLogin user)
+        public async Task<ActionResult<string>> Authenticate([FromBody] AccountLogin account)
         {
-            var userIdentity = await _userManager.FindByEmailAsync(user.Email);
-            if (userIdentity is null || !await _userManager.CheckPasswordAsync(userIdentity, user.Password))
-                return Unauthorized();
-
-            var role = await _userManager.IsInRoleAsync(userIdentity, IEnv.RoleAdmin)
-                ? IEnv.RoleAdmin
-                : IEnv.RoleClient;
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new(ClaimTypes.Name, userIdentity.Name),
-                    new(ClaimTypes.NameIdentifier, userIdentity.Id.ToString()),
-                    new(ClaimTypes.Email, userIdentity.Email),
-                    new(ClaimTypes.Role, role)
-                }),
-                Expires = DateTime.UtcNow.AddHours(24),
-                SigningCredentials = new SigningCredentials(IEnv.JwtKey, SecurityAlgorithms.HmacSha256Signature),
-                Issuer = IEnv.JwtIssuer,
-                Audience = IEnv.JwtAudience
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return tokenHandler.WriteToken(token);
+            var res = await _mediator.Send<string?>(account);
+            return res != null ? Ok(res) : Unauthorized();
         }
     }
 }
