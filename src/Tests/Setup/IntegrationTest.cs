@@ -127,7 +127,7 @@ namespace Tests.Setup
 
             _client = actualFactory.CreateClient();
 
-            LoginAsAdmin().Wait();
+            LoginAsSuperAdmin().Wait();
         }
 
         // Login as the user
@@ -175,9 +175,14 @@ namespace Tests.Setup
             return (await Post<UserView>("users", _bob)).Item2;
         }
 
-        private async Task LoginAsAdmin()
+        protected async Task LoginAsSuperAdmin()
         {
-            await Login(IEnv.AdminUserView.Email, "Supersecretpassw000rd!");
+            await Login(IEnv.SuperAdminUserView.Email, "Supersecretpassw000rd!");
+        }
+
+        protected async Task LoginAsAdmin()
+        {
+            await Login(IEnv.AdminUserView.Email, "Secretpassw000rd!");
         }
 
         protected async Task LoginAsAlice()

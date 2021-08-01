@@ -100,7 +100,7 @@ namespace Tests
 
             // Assert
             res.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
+            actual.Should().BeEquivalentTo(IEnv.AdminUserView, IEnv.SuperAdminUserView);
         }
 
         [Theory]
@@ -180,7 +180,8 @@ namespace Tests
                         Id = MockedEnv.CreateGuid(1),
                         Email = "caio.souza@puchealth.com.br",
                         Name = "Caio Souza"
-                    }
+                    },
+                    IEnv.SuperAdminUserView
                 }, options => options.WithStrictOrdering()
             );
         }
@@ -267,7 +268,8 @@ namespace Tests
                         Id = MockedEnv.CreateGuid(1),
                         Email = "philipe.souza@puchealth.com.br",
                         Name = "Philipe Souza"
-                    }
+                    },
+                    IEnv.SuperAdminUserView
                 }, options => options.WithStrictOrdering()
             );
         }
@@ -300,7 +302,7 @@ namespace Tests
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
+            actual.Should().BeEquivalentTo(IEnv.SuperAdminUserView, IEnv.AdminUserView);
         }
 
         #endregion
@@ -354,7 +356,7 @@ namespace Tests
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            actual.Should().BeEquivalentTo(IEnv.AdminUserView);
+            actual.Should().BeEquivalentTo(IEnv.AdminUserView, IEnv.SuperAdminUserView);
         }
 
         #endregion

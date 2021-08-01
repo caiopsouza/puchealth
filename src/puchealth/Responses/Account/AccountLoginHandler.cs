@@ -12,11 +12,11 @@ using puchealth.Services;
 
 namespace puchealth.Responses.Account
 {
-    public class UserLoginHandler : IRequestHandler<AccountLogin, string?>
+    public class AccountLoginHandler : IRequestHandler<AccountLogin, string?>
     {
         private readonly UserManager<User> _userManager;
 
-        public UserLoginHandler(UserManager<User> userManager)
+        public AccountLoginHandler(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
@@ -27,8 +27,11 @@ namespace puchealth.Responses.Account
             if (userIdentity is null || !await _userManager.CheckPasswordAsync(userIdentity, request.Password))
                 return null;
 
-            var role = await _userManager.IsInRoleAsync(userIdentity, IEnv.RoleAdmin)
-                ? IEnv.RoleAdmin
+            var roles = await _userManager.GetRolesAsync(userIdentity);
+
+            var role =
+                roles.Contains(IEnv.RoleSuper) ? IEnv.RoleSuper
+                : roles.Contains(IEnv.RoleAdmin) ? IEnv.RoleAdmin
                 : IEnv.RoleUser;
 
             var tokenDescriptor = new SecurityTokenDescriptor

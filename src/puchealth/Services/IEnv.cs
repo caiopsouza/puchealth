@@ -21,10 +21,18 @@ namespace puchealth.Services
         public const string AccessAdmin = "admin,super";
         public const string AccessSuper = "super";
 
-        // Admin has a fixed Id for convenience
-        public static readonly UserView AdminUserView = new()
+        // Admins have a fixed Id for convenience
+        public static readonly UserView SuperAdminUserView = new()
         {
             Id = Guid.Parse("f7f300c9-18f8-4c66-9e7e-55c5ca378dac"),
+            Name = "SuperAdmin",
+            Email = "superadmin@puchealth.com.br"
+        };
+
+        // Admins have a fixed Id for convenience
+        public static readonly UserView AdminUserView = new()
+        {
+            Id = Guid.Parse("a5de6903-e941-44d5-8644-5d390a0d0761"),
             Name = "Admin",
             Email = "admin@puchealth.com.br"
         };

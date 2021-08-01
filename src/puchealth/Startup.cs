@@ -182,15 +182,38 @@ namespace puchealth
             {
                 using var roleManager = serviceScopeRole.ServiceProvider.GetRequiredService<RoleManager<Role>>();
 
+                if (await roleManager.FindByNameAsync(IEnv.RoleUser) is null)
+                    await roleManager.CreateAsync(new Role(new Guid("520edcd6-2a09-4ea7-92e0-5a25d63cffcb"),
+                        IEnv.RoleUser));
+
                 if (await roleManager.FindByNameAsync(IEnv.RoleAdmin) is null)
                     await roleManager.CreateAsync(new Role(new Guid("44b23886-c13a-49b4-9680-c0a6fddb3812"),
                         IEnv.RoleAdmin));
+
+                if (await roleManager.FindByNameAsync(IEnv.RoleSuper) is null)
+                    await roleManager.CreateAsync(new Role(new Guid("e479e0a4-6a9f-4a4a-928a-6074cbe4be82"),
+                        IEnv.RoleSuper));
             }
 
             using (var serviceScopeUser = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 using var userManager = serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<User>>();
 
+                // Create a super-admin
+                if (userManager.FindByEmailAsync(IEnv.SuperAdminUserView.Email).Result is null)
+                {
+                    var admin = new User
+                    {
+                        Id = IEnv.SuperAdminUserView.Id,
+                        Name = IEnv.SuperAdminUserView.Name,
+                        UserName = IEnv.SuperAdminUserView.Email,
+                        Email = IEnv.SuperAdminUserView.Email
+                    };
+                    await userManager.CreateAsync(admin, "Supersecretpassw000rd!");
+                    await userManager.AddToRoleAsync(admin, IEnv.RoleSuper);
+                }
+
+                // Create an admin
                 if (userManager.FindByEmailAsync(IEnv.AdminUserView.Email).Result is null)
                 {
                     var admin = new User
@@ -200,7 +223,7 @@ namespace puchealth
                         UserName = IEnv.AdminUserView.Email,
                         Email = IEnv.AdminUserView.Email
                     };
-                    await userManager.CreateAsync(admin, "Supersecretpassw000rd!");
+                    await userManager.CreateAsync(admin, "Secretpassw000rd!");
                     await userManager.AddToRoleAsync(admin, IEnv.RoleAdmin);
                 }
             }

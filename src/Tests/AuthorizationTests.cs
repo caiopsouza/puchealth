@@ -31,7 +31,7 @@ namespace Tests
         public async Task LoginInfo()
         {
             // Act
-            var (response, actual) = await LoginHttpResponse(IEnv.AdminUserView.Email, "Supersecretpassw000rd!");
+            var (response, actual) = await LoginHttpResponse(IEnv.SuperAdminUserView.Email, "Supersecretpassw000rd!");
             response.EnsureSuccessStatusCode();
 
             var jwtHandler = new JwtSecurityTokenHandler();
@@ -48,14 +48,15 @@ namespace Tests
             }
 
             // For some reason nameidentifier is mapped into nameid. It seems to work otherwise.
-            GetClaim("nameid").Should().BeEquivalentTo(IEnv.AdminUserView.Id.ToString());
-            GetClaim("email").Should().BeEquivalentTo(IEnv.AdminUserView.Email);
-            GetClaim("unique_name").Should().BeEquivalentTo(IEnv.AdminUserView.Name);
-            GetClaim("role").Should().BeEquivalentTo(IEnv.RoleAdmin);
+            GetClaim("nameid").Should().BeEquivalentTo(IEnv.SuperAdminUserView.Id.ToString());
+            GetClaim("email").Should().BeEquivalentTo(IEnv.SuperAdminUserView.Email);
+            GetClaim("unique_name").Should().BeEquivalentTo(IEnv.SuperAdminUserView.Name);
+            GetClaim("role").Should().BeEquivalentTo(IEnv.RoleSuper);
         }
 
         [Theory]
-        [InlineData("admin@puchealth.com.br", "Supersecretpassw000rd!", true)]
+        [InlineData("superadmin@puchealth.com.br", "Supersecretpassw000rd!", true)]
+        [InlineData("admin@puchealth.com.br", "Secretpassw000rd!", true)]
         [InlineData("administrator@puchealth.com.br", "Supersecretpassw000rd!", false)] // Wrong user
         [InlineData("admin@puchealth.com.br", "supersecretpassw000rd!", false)] // Wrong password
         [InlineData("administrator@puchealth.com.br", "supersecretpassw000rd!", false)] // Both wrong
@@ -83,8 +84,23 @@ namespace Tests
 
         [Theory]
         [MemberData(nameof(PermissionData))]
+        public async Task HasPermissionSuperAdmin(string controller, string path, string verb, bool _)
+        {
+            // Act
+            var actual = await RunVerb(verb, controller + path);
+
+            // Assert
+            actual.Should().NotBe(HttpStatusCode.MethodNotAllowed);
+            actual.Should().NotBe(HttpStatusCode.Forbidden);
+        }
+
+        [Theory]
+        [MemberData(nameof(PermissionData))]
         public async Task HasPermissionAdmin(string controller, string path, string verb, bool _)
         {
+            // Arrange
+            await LoginAsAdmin();
+
             // Act
             var actual = await RunVerb(verb, controller + path);
 
