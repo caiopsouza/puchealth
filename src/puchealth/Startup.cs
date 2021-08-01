@@ -51,11 +51,23 @@ namespace puchealth
             );
 
             services.AddScoped<User>();
+            services.AddScoped<Paciente>();
+            services.AddScoped<Profissional>();
             services.AddScoped<Role>();
 
             services.AddSingleton<IEnv, Env>();
 
             services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<Context>()
+                .AddDefaultTokenProviders();
+
+            services.AddIdentityCore<Paciente>()
+                .AddRoles<Role>()
+                .AddEntityFrameworkStores<Context>()
+                .AddDefaultTokenProviders();
+
+            services.AddIdentityCore<Profissional>()
+                .AddRoles<Role>()
                 .AddEntityFrameworkStores<Context>()
                 .AddDefaultTokenProviders();
 
@@ -176,8 +188,23 @@ namespace puchealth
                 await context.Database.MigrateAsync();
             }
 
+            // Create additional data
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
+            {
+                await using var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
+                if (!await context.Especialidades.AnyAsync(e => e.Id == IEnv.Radiologia.Id))
+                {
+                    context.Especialidades.Add(new Especialidade
+                    {
+                        Id = IEnv.Radiologia.Id,
+                        Name = IEnv.Radiologia.Name,
+                        Descricao = IEnv.Radiologia.Descricao,
+                    });
+                    await context.SaveChangesAsync();
+                }
+            }
+
             // Create roles
-            // Ids are fixed for convenience
             using (var serviceScopeRole = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 using var roleManager = serviceScopeRole.ServiceProvider.GetRequiredService<RoleManager<Role>>();
@@ -195,6 +222,7 @@ namespace puchealth
                         IEnv.RoleSuper));
             }
 
+            // Create admins
             using (var serviceScopeUser = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 using var userManager = serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<User>>();
@@ -225,6 +253,29 @@ namespace puchealth
                     };
                     await userManager.CreateAsync(admin, "Secretpassw000rd!");
                     await userManager.AddToRoleAsync(admin, IEnv.RoleAdmin);
+                }
+            }
+
+            // Create profissionais
+            using (var serviceScopeUser = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
+            {
+                using var profissionalManager =
+                    serviceScopeUser.ServiceProvider.GetRequiredService<UserManager<Profissional>>();
+
+                // Create a super-admin
+                if (profissionalManager.FindByEmailAsync(IEnv.ProfissionalView.Email).Result is null)
+                {
+                    var profissional = new Profissional
+                    {
+                        Id = IEnv.ProfissionalView.Id,
+                        Name = IEnv.ProfissionalView.Name,
+                        UserName = IEnv.ProfissionalView.Email,
+                        Email = IEnv.ProfissionalView.Email,
+                        Tipo = IEnv.ProfissionalView.Tipo,
+                        EspecialidadeId = IEnv.ProfissionalView.Especialidade.Id
+                    };
+                    await profissionalManager.CreateAsync(profissional, "Profissionalpassw000rd!");
+                    await profissionalManager.AddToRoleAsync(profissional, IEnv.RoleUser);
                 }
             }
         }

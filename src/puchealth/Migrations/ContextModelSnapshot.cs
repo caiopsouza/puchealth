@@ -120,6 +120,42 @@ namespace puchealth.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("puchealth.Models.Especialidade", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descricao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Especialidades");
+                });
+
+            modelBuilder.Entity("puchealth.Models.Procedimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descricao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Procedimentos");
+                });
+
             modelBuilder.Entity("puchealth.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -158,6 +194,10 @@ namespace puchealth.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -216,6 +256,30 @@ namespace puchealth.Migrations
                     b.HasIndex("Name", "Id");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
+                });
+
+            modelBuilder.Entity("puchealth.Models.Paciente", b =>
+                {
+                    b.HasBaseType("puchealth.Models.User");
+
+                    b.HasDiscriminator().HasValue("Paciente");
+                });
+
+            modelBuilder.Entity("puchealth.Models.Profissional", b =>
+                {
+                    b.HasBaseType("puchealth.Models.User");
+
+                    b.Property<Guid>("EspecialidadeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("EspecialidadeId");
+
+                    b.HasDiscriminator().HasValue("Profissional");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -267,6 +331,17 @@ namespace puchealth.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("puchealth.Models.Profissional", b =>
+                {
+                    b.HasOne("puchealth.Models.Especialidade", "Especialidade")
+                        .WithMany()
+                        .HasForeignKey("EspecialidadeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Especialidade");
                 });
 #pragma warning restore 612, 618
         }

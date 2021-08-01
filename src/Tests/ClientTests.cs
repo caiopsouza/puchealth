@@ -100,7 +100,9 @@ namespace Tests
 
             // Assert
             res.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.AdminUserView, IEnv.SuperAdminUserView);
+            actual.Should().BeEquivalentTo(
+                new[] {IEnv.AdminUserView, IEnv.ProfissionalUserView, IEnv.SuperAdminUserView},
+                config => config.WithStrictOrdering());
         }
 
         [Theory]
@@ -113,7 +115,7 @@ namespace Tests
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            actual.Should().BeEquivalentTo(expected, options => options.WithoutStrictOrdering());
+            actual.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
 
         #region Post
@@ -181,6 +183,7 @@ namespace Tests
                         Email = "caio.souza@puchealth.com.br",
                         Name = "Caio Souza"
                     },
+                    IEnv.ProfissionalUserView,
                     IEnv.SuperAdminUserView
                 }, options => options.WithStrictOrdering()
             );
@@ -202,7 +205,7 @@ namespace Tests
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-            actual.Should().BeEquivalentTo(expected, options => options.WithoutStrictOrdering());
+            actual.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
         }
 
         [Fact]
@@ -269,6 +272,7 @@ namespace Tests
                         Email = "philipe.souza@puchealth.com.br",
                         Name = "Philipe Souza"
                     },
+                    IEnv.ProfissionalUserView,
                     IEnv.SuperAdminUserView
                 }, options => options.WithStrictOrdering()
             );
@@ -302,7 +306,9 @@ namespace Tests
 
             // Assert
             response.EnsureSuccessStatusCode();
-            actual.Should().BeEquivalentTo(IEnv.SuperAdminUserView, IEnv.AdminUserView);
+            actual.Should().BeEquivalentTo(
+                new[] {IEnv.AdminUserView, IEnv.ProfissionalUserView, IEnv.SuperAdminUserView},
+                config => config.WithStrictOrdering());
         }
 
         #endregion
@@ -356,7 +362,9 @@ namespace Tests
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-            actual.Should().BeEquivalentTo(IEnv.AdminUserView, IEnv.SuperAdminUserView);
+            actual.Should().BeEquivalentTo(
+                new[] {IEnv.AdminUserView, IEnv.ProfissionalUserView, IEnv.SuperAdminUserView},
+                config => config.WithStrictOrdering());
         }
 
         #endregion
