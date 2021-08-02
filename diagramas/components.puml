@@ -1,0 +1,64 @@
+@startuml Diagrama de componentes
+'left to right direction
+'skinparam linetype ortho
+
+package "HTML" as html {
+
+[Módulo da Página principal] <<HTML>> as pagina
+[Módulo de autenticação\ne criação de conta] <<HTML>> as auth
+[Módulo de agenda] <<HTML>> as agenda
+[Módulo de agendamento] <<HTML>> as agendamento
+[Módulo de estabelecimentos] <<HTML>> as estabelecimentos
+[Módulo de relatórios] <<HTML>> as relatorios
+[Módulo de especialidades] <<HTML>> as especialidades
+[Módulo de procedimentos] <<HTML>> as procedimentos
+[Módulo de usuários] <<HTML>> as usuarios
+[Módulo de codigo de doenças] <<HTML>> as doencas
+[Módulo de ações publicitárias] <<HTML>> as acoes
+[Módulo de leitos] <<HTML>> as leitos
+
+note right of relatorios
+    Relatórios periódicos
+    Relatórios de procedimentos
+    Relatórios de internações
+    Prontuário
+    Cartão de vacinação
+    Estoque de medicamentos
+end note
+}
+
+package "Interface" as interface {
+    [SPA] <<React>> as react
+    [Gerenciamento de estado] <<Redux>> as redux
+    [Estilo de páginas] <<Bootstrap>> as bootstrap
+}
+
+html ..> interface : use
+
+package "API" as api {
+    [API Rest] <<.NET Core>> as dotnet
+    [Autenticação e Autorização] <<JWT>> as jwt
+    [Log da aplicação] <<Serilog>> as serilog
+}
+
+interface ..> api : use
+
+package "Entrega" as entrega {
+    [Servidor da aplicação] <<IIS Express>> as server
+    [Hospedagem] <<Microsoft Azure>> as azure
+    [Deploy e integração contínua] <<Github actions>> as gactions
+    [Dependências e build] <<Nuget>> as nuget
+}
+
+entrega ..> interface : use
+entrega ..> api : use
+
+package "Dados" as dados {
+    [Banco de dados] <<Postgre>> as postgre
+    [E-mail] <<Smtp>> as smtp
+    [Cache] <<MemoryCache>> as memoryCache
+}
+
+api ..> dados : use
+
+@enduml

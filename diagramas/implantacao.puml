@@ -1,0 +1,49 @@
+@startuml Diagrama de componentes
+'left to right direction
+'skinparam linetype ortho
+
+node Usuário as usuario {
+    [Navegador] as navegador
+}
+
+node "Servidor Web" as frontend {
+    [SPA\nPágina Web] as spa
+}
+
+usuario --> frontend : <<TCP>>
+navegador -[dashed]-> spa : <<HTTPS>>
+
+node "Servidor Web" as backend {
+    [Microsoft IIS] as iis
+}
+
+frontend --> backend : <<TCP>>
+spa -[dashed]-> iis : <<HTTPS>>
+
+node ".NET Framework" as dotnet {
+    node "Container" as container {
+        [Controller] as controller
+        [Mediatr] as mediatr
+    }
+    node "Persistência" as persistencia {
+        [Contexto] as contexto
+        [MemoryCache] as cache
+    }
+}
+
+controller -[dashed]-> mediatr
+contexto -[dashed]right-> cache
+mediatr -[dashed]-> contexto
+mediatr -[dashed]-> cache
+
+backend --> dotnet
+iis -[dashed]-> controller
+
+node "Servidor de banco de dados" as dados {
+    [PostgreSQL] as postgre
+}
+
+dotnet --> dados
+contexto -[dashed]-> postgre
+
+@enduml

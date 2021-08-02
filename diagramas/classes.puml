@@ -17,7 +17,6 @@ class "Endereço" as endereco {
   +CEP: String
   --
   createEndereco(): Endereco
-  getEnderecoById(): Endereco
   editEndereco(): Void
 }
 
@@ -58,7 +57,7 @@ paciente --|> usuario
 class "Profissional" as profissional {
   --
   +createProfissional(): Profissional
-  +getProfissional(): Profissional
+  +getProfissionalById(): Profissional
   +editProfissional(): void
 }
 
@@ -69,6 +68,7 @@ class "Especialidade" as especialidade {
   +Nome: String
   +Descrição: String[0..1]
   --
+  +listEspecialidade(): Especialidade[]
   +createEspecialidade(): Especialidade
   +getEspecialidadeById(): Especialidade
   +editEspecialidade(): void
@@ -91,6 +91,7 @@ class "Estabelecimento" as estabelecimento {
   +RazaoSocial: String
   +TipoId: Int
   --
+  +listEstabelecimento(): Estabelecimento[]
   +createEstabelecimento(): Estabelecimento
   +getEstabelecimentoById(): Estabelecimento
   +editEstabelecimento(): void
@@ -112,9 +113,11 @@ class "Medicamento" as medicamento {
   +Nome: String
   +Quantidade: Int
   --
+  +listMedicamento(): Medicamento[]
   +createMedicamento(): Medicamento
   +getMedicamentoById(): Medicamento
   +editMedicamento(): void
+  +deletetMedicamento(): void
 }
 
 estabelecimento "1"--"0..*" medicamento
@@ -124,11 +127,11 @@ class "Vacina" as vacina {
   +Nome: String
   +Descrição: String[0..1]
   --
-  +findVacina(): Vacina[]
+  +listVacina(): Vacina[]
   +createVacina(): Vacina
   +getVacinaById(): Vacina
-  +deleteVacina(): void
   +editVacina(): void
+  +deleteVacina(): void
 }
 
 estabelecimento "0..*"--"0..*" vacina
@@ -138,11 +141,11 @@ class "Procedimento" as procedimento {
   +Nome: String
   +Descrição: String
   --
-  +findProcedimento(): Procedimento[]
+  +listProcedimento(): Procedimento[]
   +createProcedimento(): Procedimento
   +getProcedimentoById(): Procedimento
-  +deleteProcedimento(): void
   +editProcedimento(): void
+  +deleteProcedimento(): void
 }
 
 estabelecimento "0..*"-"0..*" procedimento
@@ -151,6 +154,12 @@ class "ProcedimentoOferecido" as proc_oferecido {
   +Id: Guid
   +Horário: DateTime
   +Duração: TimeSpan
+  --
+  +listOferecido(): ProcedimentoOferecido[]
+  +createOferecido(): ProcedimentoOferecido
+  +getOferecidoById(): ProcedimentoOferecido
+  +editOferecido(): void
+  +deleteOferecido(): void
 }
 
 (estabelecimento, procedimento) . proc_oferecido
@@ -169,11 +178,11 @@ class "Agenda" as agenda {
   +Entrada: DateTime[0..1]
   +Saída: DateTime[0..1]
   --
-  +findAgenda(): Agenda[]
+  +listAgenda(): Agenda[]
   +createAgenda(): Agenda
   +getAgendaById(): Agenda
-  +deleteAgenda(): void
   +editAgenda(): void
+  +deleteAgenda(): void
 }
 
 agenda_situacao "1"--"0..*" agenda
@@ -186,8 +195,8 @@ class "Leito" as leito {
   +findLeito(): Leito[]
   +createLeito(): Leito
   +getLeitoById(): Leito
-  +deleteLeito(): void
   +editLeito(): void
+  +deleteLeito(): void
 }
 
 estabelecimento "1"--"0..n" leito
@@ -196,6 +205,12 @@ class "Internação" as internacao {
   +Id: Guid
   +Entrada: DateTime
   +Saída: DateTime[0..1]
+  --
+  +findInternacao(): Internacao[]
+  +createInternacao(): Internacao
+  +getInternacaoById(): Internacao
+  +editInternacao(): void
+  +deleteInternacao(): void
 }
 
 internacao "1"--"0..*" leito
@@ -208,11 +223,11 @@ class "Ação" as acao {
   +InícioExibição: DateTime
   +FinalExibição: DateTime
   --
-  +findAcoes(): Acao[]
+  +findAcao(): Acao[]
   +createAcao(): Acao
   +getAcaoById(): Acao
-  +deleteAcao(): void
   +editAcao(): void
+  +deleteAcao(): void
 }
 
 class "CodigoDoencas" as doencas {
@@ -223,7 +238,7 @@ class "CodigoDoencas" as doencas {
   +Ativo: Bool
   --
   +getDoencas(): Doencas[]
-  +updateDoencas(): void
+  +importDoencas(): void
 }
 
 @enduml
